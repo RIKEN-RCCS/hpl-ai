@@ -1,0 +1,79 @@
+A distributed-memory implementation of HPL-AI benchmark for Fugaku and others
+
+* Tested platforms
+For Fugaku and otehr compatible systems: TCSDS-1.2.25
+Other x86 based systems: AVX2 and later CPUs, gcc-8.3.1, openmpi 3.1.4
+Requirement on x86 baased systems: AVX2, c++14, MPI-3
+
+
+* Compilation
+For Fugaku and compatible systems, run
+```
+./compile
+```
+will generate `hpl-mpi.trad`.
+
+Other x86 based systems with AVX2 instructions, run
+```
+make driver.out
+```
+will generate `driver.out`.
+
+
+* Example output
+Run
+```
+OMP_NUM_THREADS=1 mpirun -n 4 ./driver.out 1200 60 2 -not -d -r
+```
+
+will generate
+```
+done MPI_Init_thread, provided = 2
+#MPI_Init_thread: Mon Jun 29 09:04:06 2020
+jobid=0
+n=1200 b=60 r=2 c=2
+2dbc lazy rdma full nopack nocheck noskiplu ddmat
+numasize=0 numamap=ROWDIST nbuf=2
+epoch_size = 120
+#BEGIN: Mon Jun 29 09:04:06 2020
+!epoch 0/10: elapsed=0.000015, 0.000000 Pflops (estimate)
+#BEGIN: Mon Jun 29 09:04:06 2020
+!epoch 1/10: elapsed=0.184597, 0.000002 Pflops (estimate)
+!epoch 2/10: elapsed=0.516135, 0.000001 Pflops (estimate)
+!epoch 3/10: elapsed=0.774911, 0.000001 Pflops (estimate)
+!epoch 4/10: elapsed=1.006350, 0.000001 Pflops (estimate)
+!epoch 5/10: elapsed=1.201147, 0.000001 Pflops (estimate)
+!epoch 6/10: elapsed=1.341179, 0.000001 Pflops (estimate)
+!epoch 7/10: elapsed=1.435484, 0.000001 Pflops (estimate)
+!epoch 8/10: elapsed=1.493083, 0.000001 Pflops (estimate)
+!epoch 9/10: elapsed=1.523172, 0.000001 Pflops (estimate)
+# iterative refinement: step=  0, residual=3.3661494363935604e-02 hpl-harness=159967816086.442261
+# iterative refinement: step=  1, residual=3.4602426327804553e-06 hpl-harness=16119815.115418
+# iterative refinement: step=  2, residual=3.6082271632348339e-10 hpl-harness=1680.919477
+#END__: Mon Jun 29 09:04:07 2020
+# iterative refinement: step=  3, residual=3.8993114293006670e-14 hpl-harness=0.181652
+#END__: Mon Jun 29 09:04:07 2020
+1.546135562 sec. 0.746480470 GFlop/s resid = 3.899311429300667e-14 hpl-harness = 0.181652325
+```
+Note: We use ```OMP_NUM_THREADS=1``` on localhost to prevent over-subscription. Set appropriate value for openmp and mpi hybrid model.
+
+* Configurations
+** Precisions
+The software uses triple precisions. It uses fp64 for the iterative refinement, fpxx for the panel decomposition and fpyy for the GEMM. (xx, yy) can be (64, 32) and (32, 16). The default if (32, 16). If you want to change them to (64, 32), change `FHIGH` and `FLOW` in `main.c` to `double' and `float`, respectively.
+
+** Arguments
+```
+mpirun -n <nprocs> ./driver.out <n> <b> <nprow> <other options...>
+```
+Requires `n%b == 0`, `npcol = nprocs % nprow == 0`, `nprow >= 2', and `nprocs / nprow >= 2'.
+Keep `npcol` and `nprow` as close as possible for better work balance.
+
+*** Fugaku and compatible systems
+It performs best with when `<other options>` is `-not -r -d`.
+You need some NDA codes to achive best performance.
+
+*** Other systems
+`<other options>' should be `-not -d` or `-not -r -d`.
+
+* Limitations
+We omits NDA part of the code for the Fugaku supercomputer. You need to contact with Fujitsu and Riken to see the actual code.
