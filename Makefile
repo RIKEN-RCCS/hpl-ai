@@ -2,7 +2,7 @@ MPICXX = mpicxx
 CXXFP16 = mpicxx
 DEFINES = -DEXTERNAL_CONV -DOTF_GEMV_OPTIMIZED
 CFLAGS = -W -Wall -fopenmp #-lm
-CFLAGS += -std=c++14 -O2 -Wextra -march=native $(DEFINES)
+CFLAGS += -std=c++17 -O2 -Wextra -march=native $(DEFINES)
 CXXFP16FLAGS = $(CFLAGS)
 LDFLAGS = -lm
 LDFLAGS += -L ../lib -lblas
