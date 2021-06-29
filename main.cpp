@@ -208,7 +208,7 @@ int main(int argc, char **argv)
 			wallocated = false;
 		}
 		else {
-			w = static_cast<double*>(malloc(sizeof(double)*(ldv*10+b*b)));
+			w = static_cast<double*>(malloc(sizeof(double)*(ldv*10+2*b*b)));
 			wallocated = true;
 		}
 
